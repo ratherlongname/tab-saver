@@ -1,19 +1,12 @@
 # tab-saver
 
-On startup && (tabs in storage) --> restore tabs, empty storage
-On browser_action --> save tabs to storage
+A web extension to stash all your tabs (across all windows) on the press of a button, and restore them the next time you open the browser.
 
-browser.windows.getAll populate is not well supported by Edge, so tabs.query and windows.getAll both are used.
-
-"background": {
-    "scripts": ["background-script.js"],
-    "persistent": true
-}
-
-"browser_specific_settings": {
-    "gecko": {
-        "id": "tabsaver@tabsaver.com"
-    }
-}
-
-initial windowId and final windowId should have no connection
+## TODO
+- [ ] Clean up the README
+- [ ] Refactor code to have clear flow
+- [ ] Fix variable names
+- [ ] Work with incognito
+- [ ] Thorough testing on Firefox Developer
+- [ ] Port to other browsers
+- [ ] Thorough testing on other browsers, other operating systems
