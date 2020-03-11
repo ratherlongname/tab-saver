@@ -3,7 +3,7 @@
 A web extension to stash all your tabs (across all windows) on the press of a button, and restore them the next time you open the browser.
 
 ## TODO
-- [ ] Clean up the README
+- [x] Clean up the README
 - [ ] Refactor code to have clear flow
 - [ ] Fix variable names
 - [ ] Work with incognito
