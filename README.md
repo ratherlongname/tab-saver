@@ -4,8 +4,10 @@ A web extension to stash all your tabs (across all windows) on the press of a bu
 
 ## TODO
 - [x] Clean up the README
-- [ ] Refactor code to have clear flow
-- [ ] Fix variable names
+- [x] Refactor code to have clear flow
+- [x] Fix variable names
+- [x] Fix New Tabs not closing
+- [ ] Handle disallowed tabs like New Tab, about:...
 - [ ] Work with incognito
 - [ ] Thorough testing on Firefox Developer
 - [ ] Port to other browsers

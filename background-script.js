@@ -1,68 +1,46 @@
-browser.browserAction.onClicked.addListener(saveSession);
+browser.browserAction.onClicked.addListener(save);
 
-browser.runtime.onStartup.addListener(getSesh);
+browser.runtime.onStartup.addListener(restore);
 
-function saveSession() {
+async function save() {
     console.log("Browser action clicked");
 
     // Get all open windows, tabs
-    const gettingAll = browser.windows.getAll();
-    const querying = browser.tabs.query({});
-    Promise.all([gettingAll, querying])
-        .then(saveTabs, onError);
+    let data_windows_tabs = await get_data_windows_tabs();
+    console.log(data_windows_tabs);
+
+    // Create unified save_data
+    let save_data = {
+        "windows": add_tabs_to_window(data_windows_tabs[0], data_windows_tabs[1])
+    };
+    console.log(save_data);
+
+    // Set save_data in storage
+    let ret_val = await browser.storage.local.set({ save_data });
+    console.log("save_data stored");
+
+    return;
 }
 
-function saveTabs(values) {
-    let windows = values[0];
-    let tabs = values[1];
-    console.log("values:");
-    console.log(values);
-    // console.log("windows.getAll result:");
-    // for (let window of windows) {
-    //     console.log(window);
-    // }
-    // console.log("tabs.query result:");
-    // for (let tab of tabs) {
-    //     console.log(tab);
-    // }
+function get_data_windows_tabs() {
+    let data_windows = get_data_windows();
+    let data_tabs = get_data_tabs();
 
-    // Extract useful information from
-    // windows - id, focused, height, left, state, top, type, width
-    // tabs - active, index, pinned, url, windowId
+    let promises = [
+        data_windows,
+        data_tabs
+    ];
+    return Promise.all(promises);
+}
 
-    let windows_to_save = windows.map(trimWindowObject);
-    console.log("windows_to_save:");
-    for (let window of windows_to_save) {
-        console.log(window);
-    }
+async function get_data_windows() {
+    let all_windows = await browser.windows.getAll();
+    let data_windows = trim_all_windows(all_windows);
+    return data_windows;
+}
 
-    let tabs_to_save = tabs.map(trimTabObject);
-    console.log("tabs_to_save:");
-    for (let tab of tabs_to_save) {
-        console.log(tab);
-    }
-
-    for(let window of windows_to_save) {
-        for(let tab of tabs_to_save) {
-            if (tab.windowId === window.id) {
-                window.tabs.push(tab);
-            }
-        }
-    }
-
-    console.log("windows_to_save final:");
-    for (let window of windows_to_save) {
-        console.log(window);
-    }
-
-    let sesh = {
-        "saved_windows": windows_to_save
-    }
-
-    // Save windows to local storage
-    browser.storage.local.set({ sesh })
-        .then(setSesh, onError);
-
+function trim_all_windows(all_windows) {
+    return all_windows.map(trimWindowObject);
 }
 
 function trimWindowObject(window) {
@@ -79,6 +57,16 @@ function trimWindowObject(window) {
     };
 }
 
+async function get_data_tabs() {
+    let all_tabs = await browser.tabs.query({});
+    let data_tabs = trim_all_tabs(all_tabs);
+    return data_tabs;
+}
+
+function trim_all_tabs(all_tabs) {
+    return all_tabs.map(trimTabObject);
+}
+
 function trimTabObject(tab) {
     return {
         "windowId": tab.windowId,
@@ -89,21 +77,24 @@ function trimTabObject(tab) {
     };
 }
 
-function setSesh() {
-    console.log("Sesh stored");
+function add_tabs_to_window(windows, tabs) {
+    for (const window of windows) {
+        for (const tab of tabs) {
+            if (tab.windowId === window.id) {
+                window.tabs.push(tab);
+            }
+        }
+    }
+
+    return windows;
 }
 
-function getSesh() {
+async function restore() {
     console.log("onStartup event triggered");
 
-    // Try to get sesh from local storage
-    browser.storage.local.get("sesh")
-        .then(checkTabs, onError);
+    // Get save_data from storage
+    let results = await browser.storage.local.get("save_data");
 
-}
-
-function checkTabs(results) {
-    // Check if Storage is empty or has sesh
     if (Object.keys(results).length === 0 && results.constructor === Object) {
         // Storage is empty
         console.log("Storage is empty");
@@ -111,79 +102,88 @@ function checkTabs(results) {
     }
 
     // Storage is not empty
-    let windows_to_restore = results.sesh.saved_windows
-    console.log("Windows to restore:");
-    for (let window of windows_to_restore) {
-        console.log(window)
+    let windows_to_restore = results.save_data.windows;
+    await restore_windows(windows_to_restore);
+    console.log("Windows restored");
+
+    await after_restore_windows();
+    console.log("Extra window closed, Storage cleared");
+    return;
+}
+
+function restore_windows(windows_to_restore) {
+    let promises = [];
+    for (const window of windows_to_restore) {
+        promises.push(restore_window(window));
+    }
+    return Promise.all(promises);
+}
+
+async function restore_window(window) {
+    let new_window = await browser.windows.create({
+        //"focused": window.focused,
+        "left": window.left,
+        "top": window.top,
+        "width": window.width,
+        "height": window.height,
+        "type": window.type
+    });
+    console.log(`Window created. ID:${new_window.id}`);
+
+    try {
+        await after_window_create(window, new_window);
+    } catch (err) {
+        console.error(err);
+    }
+    console.log(`All tabs created, New Tab closed, Window update done for WindowID:${new_window.id}`);
+    return;
+}
+
+function after_window_create(window, new_window) {
+    let updated_window = browser.windows.update(new_window.id, {"state": window.state});
+
+    let new_tabs = restore_tabs(window, new_window);
+
+    let promises = [
+        updated_window,
+        new_tabs
+    ];
+
+    return Promise.all(promises);
+}
+
+async function restore_tabs(window, new_window) {
+    let new_tabs = await create_tabs(window, new_window);
+    for (const tab of new_tabs) {
+        console.log(`Tab created. URL:${tab.url}`);
     }
 
-    // TODO: Restore windows
-    windows_to_restore.forEach(window => {
-        browser.windows.create({
-            //"focused": window.focused,
-            "left": window.left,
-            "top": window.top,
-            "width": window.width,
-            "height": window.height,
-            "type": window.type
-        }).then(new_window => {onWindowCreated(new_window, window)}, onError);
-    });
-
-    // TODO: Restore tabs
-    
-    // tabs_to_restore.forEach(tab => {
-    //     browser.tabs.create(tab)
-    //         .then(onTabCreated, onError);
-    // });
-
-    // TODO: Close extra New Tabs
-
-
-    // TODO: Close initial window
-    browser.windows.remove(1).then(onWindowRemoved, onError);
-
-    // TODO: Empty local storage if all tabs were opened succesfully
-    browser.storage.local.clear();
+    // Close extra New Tab
+    let tabs_to_remove = await browser.tabs.query({"windowId": new_window.id, "title": "New Tab"});
+    let tab_ids_to_remove = tabs_to_remove.map(tab => {return tab.id});
+    await browser.tabs.remove(tab_ids_to_remove);    
+    return;
 }
 
-function onWindowCreated(new_window, window) {
-    let new_window_id = new_window.id;
-    console.log(`Window created: ${new_window_id} from ${window.id}`);
-    for (let tab of window.tabs) {
-        tab.windowId = new_window_id;
-        browser.tabs.create(tab)
-            .then(onTabCreated, onError);
+function create_tabs(window, new_window) {
+    let promises = [];
+
+    for (const tab of window.tabs) {
+        tab.windowId = new_window.id;
+        promises.push(browser.tabs.create(tab));
     }
 
-    browser.windows.update(new_window_id, {"state": window.state})
-        .then(onWindowUpdated, onError);
-
-    browser.tabs.query({"windowId": new_window_id, "title": "New Tab"})
-        .then(removeNewTabs, onError);
+    return Promise.all(promises);
 }
 
-function onTabCreated(tab) {
-    console.log(`Tab created: ${tab.url}`);
-}
+function after_restore_windows() {
+    let extra_window_remove =  browser.windows.remove(1);
+    let storage_clear = browser.storage.local.clear();
 
-function onWindowUpdated(window) {
-    console.log(`Window ${window.id} state ${window.state}`);
-}
+    let promises = [
+        extra_window_remove,
+        storage_clear
+    ];
 
-function onWindowRemoved() {
-    console.log(`Window removed`);
-}
-
-function removeNewTabs(tabs) {
-    tabs.forEach(tab => {
-        browser.tabs.remove(tab.id).then(onNewTabRemove, onError);
-    });
-}
-
-function onNewTabRemove() {
-    console.log("New Tab removed");
-}
-
-function onError(error) {
-    console.log(`Error: ${error}`);
+    return Promise.all(promises);
 }
