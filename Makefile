@@ -1,11 +1,9 @@
-.PHONY: dev clean
-.DEFAULT: dev
+.PHONY: clean
+.DEFAULT: tab-saver.zip
 
-dev: tab-saver.zip
-
-tab-saver.zip: background-script.js manifest.json icons/*.png
+tab-saver.zip: src/*
 	-rm -f tab-saver.zip
-	zip -r tab-saver . -i manifest.json icons/*.png background-script.js
+	cd src/ && zip -r ../tab-saver.zip .
 
 clean:
 	-rm -f tab-saver.zip
