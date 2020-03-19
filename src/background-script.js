@@ -1,3 +1,9 @@
+window.browser = (function() {
+    return window.msBrowser ||
+        window.browser ||
+        window.chrome;
+})();
+
 browser.browserAction.onClicked.addListener(save);
 
 browser.runtime.onStartup.addListener(restore);
