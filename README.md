@@ -11,6 +11,9 @@ A web extension to stash all your tabs (across all windows) on the press of a bu
 - [ ] Port to chrome
 - [ ] Transpile async/await etc to callbacks
 - [ ] Release on chrome web store
+- [ ] Touch up the README
+- [ ] Add some license to the code and project
+- [ ] Design document with code flowchart
 - [ ] Port to edge
 - [ ] Release for edge
 - [ ] Handle disallowed tabs like New Tab, about:...
