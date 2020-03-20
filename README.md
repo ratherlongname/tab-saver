@@ -8,9 +8,10 @@ A web extension to stash all your tabs (across all windows) on the press of a bu
 - [x] Fix variable names
 - [x] Fix New Tabs not closing
 - [x] Release on mozilla addons
-- [ ] Port to chrome
 - [ ] Transpile async/await etc to callbacks
+- [ ] Port to chrome
 - [ ] Release on chrome web store
+- [ ] Automate build system
 - [ ] Touch up the README
 - [ ] Add some license to the code and project
 - [ ] Design document with code flowchart
