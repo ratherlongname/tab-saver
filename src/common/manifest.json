@@ -20,10 +20,5 @@
       "browser-polyfill.js",
       "background-script.js"
     ]
-  },
-  "browser_specific_settings": {
-    "gecko": {
-      "id": "tabsaver@tabsaver.com"
-    }
   }
 }
