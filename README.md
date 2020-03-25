@@ -29,3 +29,4 @@ A web extension to stash all your tabs (across all windows) on the press of a bu
   - [ ] how to load dev builds to browser
 - [ ] Handle disallowed tabs like New Tab, about:...
 - [ ] Work with incognito
+- [ ] Make basic documentation in asciidoc or restructured text
