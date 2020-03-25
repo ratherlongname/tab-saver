@@ -17,6 +17,7 @@ A web extension to stash all your tabs (across all windows) on the press of a bu
   - [ ] links to download
   - [ ] what, why permissions are needed
 - [ ] Add some license to the code and project
+- [ ] Better icons, graphics
 - [ ] Port to edge
 - [ ] Release for edge
 - [ ] Port to opera
@@ -29,4 +30,5 @@ A web extension to stash all your tabs (across all windows) on the press of a bu
   - [ ] how to load dev builds to browser
 - [ ] Handle disallowed tabs like New Tab, about:...
 - [ ] Work with incognito
+- [ ] Release properly with post to HN
 - [ ] Make basic documentation in asciidoc or restructured text
