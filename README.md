@@ -13,11 +13,19 @@ A web extension to stash all your tabs (across all windows) on the press of a bu
 - [ ] Release on chrome web store
 - [x] Automate build system
 - [ ] Touch up the README
+  - [ ] info about extension
+  - [ ] links to download
+  - [ ] what, why permissions are needed
 - [ ] Add some license to the code and project
-- [ ] Design document with code flowchart
 - [ ] Port to edge
 - [ ] Release for edge
+- [ ] Port to opera
+- [ ] Release for opera
+- [ ] Add CONTRIBUTING.md
+  - [ ] Design document with code flowchart
+  - [ ] dir structure explanation
+  - [ ] how to do prod build
+  - [ ] how to do dev build
+  - [ ] how to load dev builds to browser
 - [ ] Handle disallowed tabs like New Tab, about:...
 - [ ] Work with incognito
-- [ ] Thorough testing on Firefox Developer
-- [ ] Thorough testing on other browsers, other operating systems
